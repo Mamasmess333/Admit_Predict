@@ -27,20 +27,37 @@ git lfs pull
 We recommend Python 3.10+ (via venv, conda, or VS Code).  
 Install the required libraries:
 ```bash
-pip install pandas numpy matplotlib seaborn openpyxl
+pip install pandas numpy matplotlib seaborn openpyxl scikit-learn pytz tzdata threadpoolctl scipy
+```
+Or using the Python launcher on Windows:
+```bash
+py -m pip install pandas numpy matplotlib seaborn openpyxl scikit-learn pytz tzdata threadpoolctl scipy
 ```
 
-### 4️⃣ Open the EDA Notebook  
-In VS Code or Jupyter Lab:  
-```
-College_Scorecard_Most_Recent_Institutional_Data/Notebooks/01_EDA.ipynb
-```
+### 4️⃣ Run the Notebooks in Order  
+In VS Code or Jupyter Lab, run notebooks sequentially:
 
-This notebook walks through:
-- Dataset structure and schema  
-- Missing-data analysis  
-- Data dictionary lookups  
-- Duplicate detection  
+1. **`01_EDA.ipynb`** - Exploratory Data Analysis
+   - Dataset structure and schema  
+   - Missing-data analysis  
+   - Data dictionary lookups  
+   - Duplicate detection
+   - Univariate and bivariate visualizations
+
+2. **`02_Feature_Engineering.ipynb`** - Feature Selection & Preprocessing
+   - Feature selection (correlation, mutual information)
+   - Missing value imputation
+   - Categorical encoding
+   - Feature scaling
+   - Train/test split
+
+3. **`03_Modeling.ipynb`** - Model Building & Evaluation
+   - Linear Regression (baseline)
+   - Decision Tree Regressor
+   - k-Nearest Neighbors Regressor
+   - Support Vector Regressor
+   - Hyperparameter tuning
+   - Model comparison and evaluation  
 
 ### 5️⃣ Collaborate and Contribute  
 Create your own branch for new work (e.g., `feature-cleaning`):  
@@ -78,12 +95,16 @@ Admit_Predict/
 │   │   ├── collegescorecarddatadictionary.xlsx
 │   │
 │   ├── Notebooks/
-│   │   └── 01_EDA.ipynb
+│   │   ├── 01_EDA.ipynb                    # Exploratory Data Analysis
+│   │   ├── 02_Feature_Engineering.ipynb    # Feature Selection & Preprocessing
+│   │   └── 03_Modeling.ipynb               # Model Building & Evaluation
 │   │
 │   ├── Outputs/
 │   │   └── Cell_block_output/
 │   │       └── cell_block1.txt
 │
+├── NEXT_STEPS_ANALYSIS.md                  # Analysis of EDA and next steps
+├── PROJECT_COMPLETION_CHECKLIST.md          # Project requirements checklist
 ├── .gitattributes
 ├── .gitignore
 └── README.md
@@ -126,7 +147,11 @@ Admit_Predict/
 
 3. **Install dependencies**
    ```bash
-   pip install pandas numpy matplotlib seaborn openpyxl
+   pip install pandas numpy matplotlib seaborn openpyxl scikit-learn pytz tzdata threadpoolctl scipy
+   ```
+   Or on Windows:
+   ```bash
+   py -m pip install pandas numpy matplotlib seaborn openpyxl scikit-learn pytz tzdata threadpoolctl scipy
    ```
 
 4. **Run the EDA Notebook**
@@ -142,20 +167,52 @@ Admit_Predict/
 | Core dataset acquisition | ✅ | Downloaded from College Scorecard |
 | Data dictionary | ✅ | Added and linked |
 | Git LFS setup | ✅ | Large files handled efficiently |
-| Initial EDA | ✅ | Structure, missingness, duplicates complete |
-| Feature selection | 🔜 | Choose relevant columns for modeling |
-| Data cleaning | 🔜 | Convert types, handle NaNs |
-| Modeling | 🔜 | Build baseline Logistic Regression / Decision Tree |
+| **Phase 3: Data Understanding** | | |
+| Initial EDA | ✅ | Structure, missingness, duplicates, visualizations complete |
+| Feature selection | ✅ | Reduced to 25 features using correlation & mutual information |
+| Data cleaning | ✅ | Missing value imputation, encoding, scaling complete |
+| **Phase 4: Modeling** | | |
+| Baseline model | ✅ | Linear Regression implemented |
+| Decision Tree | ✅ | With hyperparameter tuning (GridSearchCV) |
+| k-Nearest Neighbors | ✅ | With hyperparameter tuning |
+| Support Vector Regressor | ✅ | With hyperparameter tuning |
+| Model evaluation | ✅ | Cross-validation, metrics (MAE, RMSE, R²) |
+| Feature importance | ✅ | Coefficients, importances, permutation importance |
+| Model comparison | ✅ | Comprehensive comparison and visualization |
+| **Phase 5: Communication** | | |
+| Final report | 🔜 | PDF report needed |
+| Presentation | 🔜 | 12-15 minute presentation needed |
 
 ---
 
 ## 👩‍💻 Next Steps for Teammates  
 
 1. `git pull origin main` → `git lfs pull`  
-2. Run `01_EDA.ipynb` to review initial findings.  
-3. Create `02_Feature_Engineering.ipynb` for feature selection & cleaning.  
-4. Begin model development (Logistic Regression, Decision Tree, Random Forest).  
-5. Document findings and push updates with clear commits.  
+2. Run notebooks in order: `01_EDA.ipynb` → `02_Feature_Engineering.ipynb` → `03_Modeling.ipynb`
+3. Review `PROJECT_COMPLETION_CHECKLIST.md` for remaining tasks
+4. **Remaining work:**
+   - Add Naive Bayes model (required for probability-based category)
+   - Write final PDF report
+   - Create presentation slides (12-15 minutes)
+5. Document findings and push updates with clear commits.
+
+## 📋 Project Status
+
+**Current Completion: ~70%**
+
+✅ **Completed:**
+- Complete EDA with comprehensive visualizations
+- Feature engineering and preprocessing pipeline
+- 4 regression models with hyperparameter tuning
+- Model evaluation and comparison
+- Feature importance analysis
+
+⚠️ **Remaining:**
+- Naive Bayes model (required)
+- Final PDF report (25 points)
+- Presentation (30 points)
+
+See `PROJECT_COMPLETION_CHECKLIST.md` for detailed requirements.  
 
 ---
 
