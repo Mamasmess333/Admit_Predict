@@ -63,11 +63,11 @@ We analyze institutional-level data to identify relationships between:
 - **Demographics** (gender, ethnicity, income distributions)  
 - **Financial factors** (average aid, average debt, Pell Grant percentages)  
 
-The goal is to train regression models (Linear Regression, Decision Trees, k-Nearest Neighbors) to predict **admission rates** (ADM_RATE) at the institutional level and identify which factors most strongly influence admission decisions, making the admissions landscape more transparent.
+The goal is to train regression models (Linear Regression, Decision Trees, k-Nearest Neighbors) to predict **admission rates** (ADM_RATE) at the institutional level and identify which factors most strongly influence admission decisions, making the admissions landscape more transparent. The original pitch mentioned classification; because the published Scorecard labels are continuous rates (not admit/deny records), we model admissions as a regression problem and note in Notebook 4 how a thresholded classification view could be layered on later if needed.
 
 **Problem Type**: Regression (predicting continuous admission rate 0-1)  
 **Target Variable**: `ADM_RATE` (institutional admission rate)  
-**Final Dataset**: 827 institutions, 11 features
+**Final Dataset**: 610 institutions, 20 features (Scorecard + IPEDS + FSA)
 
 ---
 
@@ -160,19 +160,42 @@ Admit_Predict/
 | Core dataset acquisition | ✅ | Downloaded from College Scorecard |
 | Data dictionary | ✅ | Added and linked |
 | Git LFS setup | ✅ | Large files handled efficiently |
-| **Step 1: EDA** | ✅ | Structure, missingness, duplicates, feature selection |
-| **Step 2: Feature Reduction** | ✅ | Reduced to 20 features (Scorecard + IPEDS + Pell/Loan aggregates) |
-| **Step 3: Preprocessing** | ✅ | Train/test split, encoding, scaling |
-| **Step 4: Modeling** | ✅ | 3 models: Linear Regression, Decision Tree, kNN |
+| **Step 1: EDA** | ✅ | Scorecard + IPEDS + FSA merged, missingness + anomaly sweeps |
+| **Step 2: Feature Reduction** | ✅ | Corr/MI filters trimmed to 20 interpretable features |
+| **Step 3: Preprocessing** | ✅ | Train/test split (80/20), one-hot encoding, scaling |
+| **Step 4: Modeling** | ✅ | Linear Regression, Decision Tree, kNN baselines |
 | **Step 4: Hyperparameter Tuning** | ✅ | GridSearchCV for Decision Tree and kNN |
-| **Step 4: Evaluation** | ✅ | MAE, RMSE, R², residual plots, model comparison |
-| **Step 5: Explainability** | ✅ | Feature importance, coefficients, permutation importance |
-| **Step 6: Conclusions** | ✅ | Model recommendation, limitations, next steps |
+| **Step 4: Evaluation** | ✅ | MAE, RMSE, R², CV RMSE, residual diagnostics |
+| **Step 5: Explainability** | ✅ | Coefficients, tree importances, permutation importance |
+| **Step 6: Conclusions** | ✅ | Synthesis + defense-ready talking points |
 
 ### 📊 Model Performance Summary
 - **Best Model**: kNN (Tuned) – Test RMSE: **0.1576**, Test R²: **0.5615**, Test MAE: **0.1262**
 - **Dataset**: 610 institutions, 20 features (Scorecard + IPEDS + FSA Pell/Loan totals)
 - **Train/Test Split**: 488 train / 122 test (80/20)
+- **Bonus Classification Lens**: Logistic Regression on `ADM_RATE ≤ 0.50` → Accuracy **0.93**, Precision **0.95**, Recall **0.74**, F1 **0.83**, ROC AUC **0.87**
+
+---
+
+## 📔 Notebook Findings (Latest Run)
+
+| Notebook | Purpose | Key Findings |
+|----------|---------|--------------|
+| `01_EDA.ipynb` | Merge Scorecard + IPEDS + FSA, clean schema, reduce features | Final dataset: 610 × 21 (20 features + target). Dropped ≥90% missing columns, eliminated duplicate OPEIDs, retained ≤20 features using correlation + mutual information filters. |
+| `02_Preprocessing_and_Modeling.ipynb` | Build/tune models | Linear Regression, Decision Tree, and kNN compared under 80/20 split with 5-fold CV. Tuned kNN (k=25, Manhattan, distance weights) achieved RMSE 0.1576 / R² 0.5615. Includes optional logistic regression classification (ADM_RATE ≤ 0.50) with 0.93 accuracy / 0.87 ROC AUC for defense questions. |
+| `03_Explainability_and_Conclusions.ipynb` | Interpret models + summarize story | Linear coefficients highlight region + aid variables; tree importances emphasize multi-racial enrollment; permutation importance flags `LOAN_PCT_FTFT`, `COSTT4_A`, `NETPRICE_INCOME_GT_110`. |
+| `04_Model_QA_and_Defense.ipynb` | Defense prep + glossary | Documents full pipeline, definitions (MAE/RMSE/R², mutual information, p-values), region encodings, and anticipated faculty Q&A. |
+
+---
+
+## 🧾 Guideline Alignment (Kiril Kuzmin’s 6 Steps)
+
+1. **EDA basics** – Completed in `01_EDA.ipynb` (schema, missingness heatmaps/bars, dup/anomaly checks, target definition).  
+2. **≤20 interpretable features** – Final list locked at 20 (Scorecard + IPEDS + FSA) with correlation + MI rationale recorded in Notebooks 1 & 4.  
+3. **Preprocessing & splits** – `02_Preprocessing_and_Modeling.ipynb` performs 80/20 split, standardizes numeric fields for kNN, and one-hot encodes categorical fields.  
+4. **Baseline comparisons** – Linear Regression, Decision Tree, and kNN built + tuned with 5-fold CV; summary plots/table meet rubric.  
+5. **Explainability & diagnostics** – Notebook 3 covers coefficients/feature importances/permutation importance; Notebook 2 includes residual plots.  
+6. **Conclusions & defense** – Notebook 4 consolidates insights, limitations, and FAQ-style defenses; README + `PROJECT_REVIEW_SUMMARY.md` highlight best model vs alternatives.
 
 ---
 
