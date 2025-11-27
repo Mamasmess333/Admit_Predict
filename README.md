@@ -27,7 +27,7 @@ git lfs pull
 We recommend Python 3.10+ (via venv, conda, or VS Code).  
 Install the required libraries:
 ```bash
-pip install pandas numpy matplotlib seaborn openpyxl
+pip install pandas numpy matplotlib seaborn openpyxl scikit-learn scipy
 ```
 
 ### 4️⃣ Open the EDA Notebook  
@@ -63,7 +63,11 @@ We analyze institutional-level data to identify relationships between:
 - **Demographics** (gender, ethnicity, income distributions)  
 - **Financial factors** (average aid, average debt, Pell Grant percentages)  
 
-The goal is to train models such as Logistic Regression and Decision Trees to predict admission likelihood and make the admissions landscape more transparent.
+The goal is to train regression models (Linear Regression, Decision Trees, k-Nearest Neighbors) to predict **admission rates** (ADM_RATE) at the institutional level and identify which factors most strongly influence admission decisions, making the admissions landscape more transparent.
+
+**Problem Type**: Regression (predicting continuous admission rate 0-1)  
+**Target Variable**: `ADM_RATE` (institutional admission rate)  
+**Final Dataset**: 827 institutions, 11 features
 
 ---
 
@@ -76,13 +80,18 @@ Admit_Predict/
 │   ├── Data_Assets/
 │   │   ├── Most-Recent-Cohorts-Institution.csv
 │   │   ├── collegescorecarddatadictionary.xlsx
+│   │   ├── college_scorecard_clean.csv
+│   │   ├── college_scorecard_reduced.csv
+│   │   └── college_scorecard_enriched.csv   # Scorecard + IPEDS + FSA features from Notebook 01
 │   │
 │   ├── Notebooks/
-│   │   └── 01_EDA.ipynb
+│   │   ├── 01_EDA.ipynb
+│   │   ├── 02_Preprocessing_and_Modeling.ipynb
+│   │   ├── 03_Explainability_and_Conclusions.ipynb
+│   │   └── 04_Model_QA_and_Defense.ipynb
 │   │
-│   ├── Outputs/
-│   │   └── Cell_block_output/
-│   │       └── cell_block1.txt
+│   └── Outputs/
+│       └── Cell_block_ouput/
 │
 ├── .gitattributes
 ├── .gitignore
@@ -100,11 +109,20 @@ Admit_Predict/
   - `Most-Recent-Cohorts-Institution.csv`  
   - `collegescorecarddatadictionary.xlsx`
 
-### **2. Federal Student Aid Data Center (optional)**  
-- Pell Grant and loan statistics for financial-aid analysis  
-- Merge later via `OPEID`
+- **Description:** Institution-level demographics (gender/race), Pell recipients, federal loan uptake, net price by income.  
+- **Link:** [IPEDS Custom Data Files](https://nces.ed.gov/ipeds/use-the-data)  
+- **Files:**  
+  - `Data_Assets/external/ipeds/CSV_11262025-608/ipeds_final_2023.csv` (Final Release 2023 custom pull)  
+- **Join Key:** `UNITID` (also provides `OPEID` for consistency with Scorecard/FSA).
 
-### **3. U.S. Census Bureau (optional)**  
+### **3. Federal Student Aid Data Center (FSA)**  
+- **Description:** Institution-level Pell/TEACH/Iraq-Afghanistan grant totals plus Direct Loan program volumes.  
+- **Files:**  
+  - `22-23 Pell Grants/pell_grants_ay2022_2023_fullyear.csv` (stitched Q1–Q4 Pell/TEACH/IASG recipients + disbursements)  
+  - `Data_Assets/external/fsa/dl_dashboard_ay2022_2023_fullyear.csv` (stitched Direct Loan dashboard totals)  
+- **Join Key:** `OPEID` (padded to 8 digits to align with Scorecard).
+
+### **4. U.S. Census Bureau (optional)**  
 - Regional income and education data for socioeconomic context
 
 ---
@@ -126,7 +144,7 @@ Admit_Predict/
 
 3. **Install dependencies**
    ```bash
-   pip install pandas numpy matplotlib seaborn openpyxl
+   pip install pandas numpy matplotlib seaborn openpyxl scikit-learn scipy
    ```
 
 4. **Run the EDA Notebook**
@@ -142,20 +160,37 @@ Admit_Predict/
 | Core dataset acquisition | ✅ | Downloaded from College Scorecard |
 | Data dictionary | ✅ | Added and linked |
 | Git LFS setup | ✅ | Large files handled efficiently |
-| Initial EDA | ✅ | Structure, missingness, duplicates complete |
-| Feature selection | 🔜 | Choose relevant columns for modeling |
-| Data cleaning | 🔜 | Convert types, handle NaNs |
-| Modeling | 🔜 | Build baseline Logistic Regression / Decision Tree |
+| **Step 1: EDA** | ✅ | Structure, missingness, duplicates, feature selection |
+| **Step 2: Feature Reduction** | ✅ | Reduced to 20 features (Scorecard + IPEDS + Pell/Loan aggregates) |
+| **Step 3: Preprocessing** | ✅ | Train/test split, encoding, scaling |
+| **Step 4: Modeling** | ✅ | 3 models: Linear Regression, Decision Tree, kNN |
+| **Step 4: Hyperparameter Tuning** | ✅ | GridSearchCV for Decision Tree and kNN |
+| **Step 4: Evaluation** | ✅ | MAE, RMSE, R², residual plots, model comparison |
+| **Step 5: Explainability** | ✅ | Feature importance, coefficients, permutation importance |
+| **Step 6: Conclusions** | ✅ | Model recommendation, limitations, next steps |
+
+### 📊 Model Performance Summary
+- **Best Model**: kNN (Tuned) – Test RMSE: **0.1576**, Test R²: **0.5615**, Test MAE: **0.1262**
+- **Dataset**: 610 institutions, 20 features (Scorecard + IPEDS + FSA Pell/Loan totals)
+- **Train/Test Split**: 488 train / 122 test (80/20)
 
 ---
 
 ## 👩‍💻 Next Steps for Teammates  
 
 1. `git pull origin main` → `git lfs pull`  
-2. Run `01_EDA.ipynb` to review initial findings.  
-3. Create `02_Feature_Engineering.ipynb` for feature selection & cleaning.  
-4. Begin model development (Logistic Regression, Decision Tree, Random Forest).  
-5. Document findings and push updates with clear commits.  
+2. Run notebooks in order:
+   - `01_EDA.ipynb` - Exploratory data analysis and feature selection
+   - `02_Preprocessing_and_Modeling.ipynb` - Data preprocessing and model building
+   - `03_Explainability_and_Conclusions.ipynb` - Feature importance and final conclusions
+   - `04_Model_QA_and_Defense.ipynb` - Oral defense prep, overfitting checks, FAQs
+3. Review model outputs and feature importance insights
+4. Document findings and push updates with clear commits
+
+### 📚 Notebook Workflow
+1. **Notebook 1 (EDA)**: Loads Scorecard + IPEDS + FSA Pell/Loan → cleans/merges → exports `college_scorecard_enriched.csv`
+2. **Notebook 2 (Modeling)**: Loads enriched data → preprocesses → trains/tunes models → evaluates
+3. **Notebook 3 (Explainability)**: Analyzes best model → feature importance → conclusions  
 
 ---
 
